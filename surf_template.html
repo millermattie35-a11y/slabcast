@@ -1,0 +1,641 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SLABCAST, An honest SoCal surf read</title><meta name="description" content="SLABCAST, a free, honest SoCal surf forecast, Ventura to San Onofre. Many live sources, one clear read. No ads, no logins."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"><style>
+*{box-sizing:border-box}
+:root{
+  --sand:#fbf6ed; --sand2:#f3ead9; --ink:#143138; --mut:#5d7a83; --mut2:#8aa2a9;
+  --card:#ffffff; --line:#ece0cd; --line2:#ddcfb6;
+  --teal:#0fb4c4; --teal-d:#0a8c9b; --tealwash:#e7f8fa;
+  --coral:#ff6f5e; --coral-d:#ef5340; --good:#16a34a; --fire:#a855f7;
+}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);
+  font:14.5px/1.55 "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--sand);-webkit-font-smoothing:antialiased}
+a{color:var(--teal-d);text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px 40px}
+
+/* hero */
+.hero{position:relative;overflow:hidden;
+  background:
+   radial-gradient(900px 380px at 88% -30%,rgba(255,111,94,.16),transparent 60%),
+   linear-gradient(180deg,#e7f8fa 0%,#f1f8f2 45%,var(--sand) 100%)}
+.heroin{max-width:1180px;margin:0 auto;padding:46px 18px 70px;position:relative;z-index:2}
+.brand{font-family:"Space Grotesk",sans-serif;font-weight:700;letter-spacing:-1px;
+  font-size:clamp(46px,11vw,96px);line-height:.92;margin:0;color:var(--ink);display:flex;align-items:center;gap:.1em}
+.brand .w{position:relative}
+.brand .w::after{content:"";position:absolute;left:0;right:0;bottom:.12em;height:.1em;border-radius:99px;
+  background:linear-gradient(90deg,var(--teal),var(--coral))}
+.tagline{font-size:clamp(15px,2.6vw,20px);margin:16px 0 0;color:#2c4a52;font-weight:500;max-width:620px}
+.tagline b{color:var(--teal-d);font-weight:700}
+.sub{color:var(--mut);font-size:12.5px;margin-top:10px}
+.hwave{position:absolute;left:0;right:0;bottom:-1px;z-index:1;width:100%;height:46px;display:block}
+.hwave path{fill:var(--sand)}
+.hwave .l1{opacity:.5;animation:drift 9s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translateX(-18px)}to{transform:translateX(18px)}}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:20;background:rgba(251,246,237,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.navin{max-width:1180px;margin:0 auto;padding:11px 18px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.nbrand{font-family:"Space Grotesk";font-weight:700;font-size:18px;color:var(--ink);margin-right:auto;letter-spacing:-.3px}
+.nbrand span{color:var(--teal)}
+.nav a{color:var(--mut);font-weight:600;font-size:13px;padding:3px 0;border-bottom:2px solid transparent}
+.nav a:hover{color:var(--ink);border-color:var(--coral)}
+
+/* call cards */
+.callbar{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0 16px}
+.call{border-radius:18px;padding:16px 18px;border:1px solid var(--line);background:var(--card);position:relative;overflow:hidden;box-shadow:0 14px 36px -26px rgba(20,49,56,.5)}
+.call::before{content:"";position:absolute;inset:0 auto 0 0;width:5px}
+.call.go::before{background:var(--good)}
+.call.radar::before{background:var(--teal)}
+.call .lab{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--teal-d);font-weight:700}
+.call.go .lab{color:var(--good)}
+.call .big{font-size:19px;font-weight:700;margin:6px 0 3px;letter-spacing:-.3px;font-family:"Space Grotesk"}
+.call .det{font-size:12.5px;color:var(--mut)}
+
+.grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:17px;box-shadow:0 16px 40px -30px rgba(20,49,56,.55)}
+.card h2{font-size:12px;margin:0 0 12px;text-transform:uppercase;letter-spacing:1px;color:var(--mut)}
+.fold{cursor:pointer;display:flex;align-items:center;user-select:none}
+.fold:hover{color:var(--ink)}
+.fold .arr{margin-left:auto;font-size:11px;color:var(--mut);transition:transform .18s;flex:none}
+.card.closed .fold .arr{transform:rotate(-90deg)}
+.card.closed h2{margin-bottom:0}.card.closed .foldbody{display:none}
+
+svg#map{width:100%;height:auto;display:block;border-radius:15px;background:#06283a;cursor:grab;touch-action:none}
+svg#map.drag{cursor:grabbing}
+.mapwrap{position:relative}
+.zoomctl{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:6px}
+.zoomctl button{width:32px;height:32px;border:1px solid rgba(255,255,255,.5);background:rgba(6,40,58,.7);border-radius:9px;font-size:17px;font-weight:700;color:#eafdff;cursor:pointer;line-height:1;backdrop-filter:blur(4px)}
+.zoomctl button:hover{background:var(--teal);border-color:var(--teal)}
+.maphint{position:absolute;left:10px;bottom:9px;font-size:10px;color:#dffaff;opacity:.7;pointer-events:none;background:rgba(6,40,58,.5);padding:3px 8px;border-radius:7px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11.5px;color:var(--mut)}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.pin{cursor:pointer}.pin:hover{stroke:#fff;stroke-width:3}
+.pinlabel{font-size:10.5px;fill:#eaffff;stroke:#04222f;stroke-width:2.4px;paint-order:stroke;pointer-events:none;font-weight:700}
+
+.olist{display:flex;flex-direction:column;gap:7px}
+.orow{display:grid;grid-template-columns:58px 1fr 72px;gap:9px;align-items:center;font-size:12px;cursor:pointer;padding:4px 6px;border-radius:9px}
+.orow:hover{background:var(--tealwash)}
+.orow.cur{background:var(--tealwash);outline:1px solid var(--teal)}
+.obar{height:18px;border-radius:6px;background:var(--sand2);position:relative;overflow:hidden}
+.obar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.oradar .obar i{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 4px,transparent 4px 8px)}
+.odate{font-weight:650;color:var(--ink)}.odate small{display:block;font-weight:500;color:var(--mut2);font-size:10px}
+.ometa{color:var(--mut);text-align:right;font-variant-numeric:tabular-nums}
+.divider{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut2);margin:10px 0 2px;border-top:1px dashed var(--line2);padding-top:7px}
+
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.tab{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:7px 12px;cursor:pointer;text-align:center;min-width:64px;font-size:12px;line-height:1.25;color:var(--mut)}
+.tab:hover{border-color:var(--teal);color:var(--ink)}
+.tab.cur{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab b{display:block;font-size:12.5px}.tab small{font-size:10px;opacity:.85}
+.tab .tsc{display:inline-block;width:8px;height:8px;border-radius:50%;margin-top:3px}
+.tab.radar{border-style:dashed}
+
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:560px}
+th,td{padding:8px 9px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut2)}
+tr.spotrow{cursor:pointer}tr.spotrow:hover{background:var(--tealwash)}
+tr.sel{background:var(--tealwash)!important}
+.score{display:inline-block;min-width:30px;text-align:center;font-weight:750;border-radius:7px;padding:2px 7px;font-variant-numeric:tabular-nums}
+.rgn{color:var(--mut)}
+.dayhdr{font-size:14px;font-weight:700;margin:0 0 4px;color:var(--ink);font-family:"Space Grotesk"}
+.dayhdr .tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:1px}
+.tag.lock{background:#dff3e6;color:#15803d}.tag.rad{background:var(--tealwash);color:var(--teal-d)}
+
+.detail{margin-top:16px}
+.detail h2{font-size:16px;color:var(--ink);text-transform:none;letter-spacing:-.2px;font-family:"Space Grotesk"}
+.dchips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.dchip{border:1px solid var(--line);background:var(--card);border-radius:11px;padding:6px 8px;cursor:pointer;text-align:center;min-width:52px;line-height:1.2;color:var(--mut)}
+.dchip:hover{border-color:var(--teal);color:var(--ink)}
+.dchip b{font-size:12px;display:block;color:var(--ink)}.dchip small{font-size:9.5px;color:var(--mut2)}
+.dchip.radar{border-style:dashed}.dchip.dsel{outline:2px solid var(--teal);border-color:var(--teal)}
+.dchsc{display:inline-block;margin-top:3px;font-size:11px;font-weight:800;border-radius:5px;padding:1px 6px}
+.report{background:var(--tealwash);border-left:3px solid var(--teal);border-radius:10px;padding:10px 13px;font-size:12.5px;color:var(--ink);line-height:1.6;margin:0 0 12px}
+.report b.tk{color:var(--teal-d)}
+.planhdr{font-size:12.5px;color:var(--mut);margin:6px 0 8px}
+.planner{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.prow{display:grid;grid-template-columns:38px 1fr 42px 78px 46px 42px;gap:7px;align-items:center;padding:4px 9px;border-top:1px solid var(--line);font-size:12px}
+.prow:first-child{border-top:none}
+.prow.phead{background:var(--sand2);font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut);font-weight:700}
+.prow.besth{background:#eafaf0}
+.prow .ph{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.pbar{position:relative;height:16px;background:var(--sand2);border-radius:5px;overflow:hidden}
+.pbar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+.pbar span{position:absolute;right:5px;top:0;font-size:10px;font-weight:700;color:var(--ink);line-height:16px}
+.pm{color:var(--mut);text-align:right;font-variant-numeric:tabular-nums}
+.pw-offshore{color:#16a34a;font-weight:700}.pw-glassy{color:#0a93b8;font-weight:700}.pw-cross{color:#b45309}.pw-onshore{color:#c2410c}
+.tg{position:relative;margin:6px 0}
+.tg-svg{width:100%;height:130px;display:block;background:linear-gradient(180deg,#f3fbfc,#eaf6f8);border:1px solid var(--line);border-radius:10px}
+.tg-yax{position:absolute;left:4px;font-size:9px;color:var(--mut);background:rgba(255,255,255,.75);padding:0 3px;border-radius:3px;pointer-events:none}
+.tg-row{display:flex;width:100%}.tg-row>span{flex:1 0 0;text-align:center}
+.tg-wind{margin-top:4px;line-height:0}.tg-wind i{display:inline-block;width:7px;height:7px;border-radius:50%}
+.tg-hours{margin-top:3px}.tg-hours>span{font-size:9px;color:var(--mut2);font-variant-numeric:tabular-nums}
+.glegend{font-size:10px;color:var(--mut2);margin:9px 0 0;display:flex;flex-wrap:wrap;gap:3px;align-items:center}
+.glegend .wd{display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 2px 0 6px;vertical-align:-1px}
+.glegend .wd.off{background:#16a34a}.glegend .wd.glz{background:#38bdf8}.glegend .wd.crz{background:#b45309}.glegend .wd.on{background:#c2410c}
+.ec{position:relative;margin:4px 0 14px}
+.ec-cap{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#7c3aed;font-weight:700;margin-bottom:4px}
+.ec-svg{width:100%;height:88px;display:block;background:linear-gradient(180deg,#faf7ff,#f1eafb);border:1px solid var(--line);border-radius:10px}
+.ec-lbls{margin-top:3px}.ec-lbls>span{display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.ec-lbls b{font-size:10px;color:var(--mut);font-variant-numeric:tabular-nums}.ec-lbls small{font-size:8.5px;color:var(--mut2)}
+.ec-lbls .esel b{color:#7c3aed}.ec-lbls .esel small{color:#7c3aed;font-weight:700}
+.flat{color:var(--mut2)}.muted{color:var(--mut2)}.hazard{color:#c0392b}
+
+/* section heading */
+.sec{margin-top:34px}
+.sec .kicker{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral-d);font-weight:700}
+.sec .stitle{font-family:"Space Grotesk";font-size:clamp(22px,4vw,30px);font-weight:700;margin:4px 0 6px;color:var(--ink);letter-spacing:-.5px}
+.sec .sintro{color:var(--mut);font-size:13.5px;margin:0 0 18px;max-width:720px}
+
+/* sources */
+.srcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.src{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 15px}
+.src .sname{font-weight:700;color:var(--ink);font-size:13.5px;display:flex;align-items:center;gap:7px}
+.src .sname .ic{width:9px;height:9px;border-radius:50%;flex:none}
+.src .sdesc{color:var(--mut);font-size:12px;margin-top:5px;line-height:1.5}
+.srcstats{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+.stat{background:var(--tealwash);border:1px solid #cdeef2;border-radius:14px;padding:10px 16px;flex:1 1 130px}
+.stat b{display:block;font-family:"Space Grotesk";font-size:24px;color:var(--teal-d);line-height:1}
+.stat small{color:var(--mut);font-size:11.5px}
+.buoynote{margin-top:14px;font-size:12px;color:var(--mut)}
+.buoylist{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.buoychip{background:var(--sand2);border:1px solid var(--line2);border-radius:99px;padding:4px 11px;font-size:11.5px;color:var(--ink)}
+.buoychip b{color:var(--teal-d)}
+
+/* forms */
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cform{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+.cform .ctitle{font-family:"Space Grotesk";font-size:16px;font-weight:700;color:var(--ink);margin:0 0 2px}
+.cform .cdesc{color:var(--mut);font-size:12.5px;margin:0 0 14px}
+.cform label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:11px 0 4px;font-weight:600}
+.cform input,.cform textarea{width:100%;background:#fcfaf5;border:1px solid var(--line2);border-radius:11px;padding:10px 12px;color:var(--ink);font:inherit;font-size:13.5px}
+.cform input:focus,.cform textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(15,180,196,.16);background:#fff}
+.cform textarea{min-height:84px;resize:vertical}
+.hp{position:absolute!important;left:-9999px}
+.btn{margin-top:16px;width:100%;background:linear-gradient(95deg,var(--coral),var(--coral-d));color:#fff;border:none;border-radius:12px;padding:12px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:"Space Grotesk"}
+.btn:hover{filter:brightness(1.05)}.btn:disabled{opacity:.6;cursor:default}
+.cmsg{margin-top:12px;font-size:13px;border-radius:11px;padding:10px 12px;display:none}
+.cmsg.ok{display:block;background:#eafaf0;color:#157a3c;border:1px solid #bfe8cd}
+.cmsg.err{display:block;background:#fdeceb;color:#c0392b;border:1px solid #f4c7c2}
+
+/* ethos */
+.ethos{margin-top:34px;background:linear-gradient(180deg,#fff,var(--tealwash));border:1px solid var(--line);border-radius:20px;padding:24px}
+.ethos h3{font-family:"Space Grotesk";font-size:19px;margin:0 0 8px;color:var(--ink)}
+.ethos p{color:#33545c;font-size:13.5px;line-height:1.7;margin:0 0 10px;max-width:760px}
+.ebadges{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.ebadge{font-size:11.5px;font-weight:600;color:var(--teal-d);background:#fff;border:1px solid #cdeef2;border-radius:99px;padding:5px 12px}
+
+.foot{margin-top:30px;font-size:11.5px;color:var(--mut2);line-height:1.7;border-top:1px solid var(--line);padding-top:18px}
+.foot b{color:var(--mut)}
+#tip{position:fixed;pointer-events:none;background:#143138;color:#fff;padding:9px 11px;border-radius:10px;font-size:12px;max-width:230px;opacity:0;transition:opacity .08s;z-index:30;box-shadow:0 10px 30px rgba(0,0,0,.3);line-height:1.5}
+#tip b{font-size:13px}#tip .tcity{color:#9fc7cf;font-size:11px}
+
+@media(max-width:860px){.grid{grid-template-columns:1fr}.callbar{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}}
+
+/* ---- v3 polish: hand-crafted, Apple-clean ---- */
+.brand{display:inline-block;letter-spacing:-2.5px;font-size:clamp(56px,13vw,116px);line-height:1}
+.brand .w::after{display:none}
+.brandrule{width:clamp(170px,40%,440px);height:8px;border-radius:99px;margin:16px 0 2px;background:linear-gradient(90deg,var(--teal),var(--coral))}
+.heroin{z-index:3}.hwave{z-index:2}
+.herobg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.herobg path{fill:none;stroke:var(--teal);stroke-width:1.4;opacity:.22}
+.hero,.nav,.wrap{position:relative}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+   radial-gradient(680px 480px at 9% 5%,rgba(15,180,196,.10),transparent 62%),
+   radial-gradient(740px 520px at 95% 18%,rgba(255,111,94,.09),transparent 62%),
+   radial-gradient(900px 640px at 50% 120%,rgba(15,180,196,.06),transparent 60%)}
+/* locked-in vs radar, unmistakable */
+.tab{padding-bottom:7px}
+.tab::after{content:"LOCKED";display:block;font-size:7px;font-weight:800;letter-spacing:.7px;margin-top:4px;color:#15803d}
+.tab:not(.radar):not(.cur){border-color:#bfe6cf}
+.tab.cur::after{color:#86efac}
+.tab.radar{border-style:dashed;border-width:1.5px;border-color:#eab560;background:#fff8ec;color:#8a5a12}
+.tab.radar::after{content:"RADAR";color:#d98a00}
+.tab.radar:hover{border-color:#d98a00;color:#7a4d10}
+.tab.cur.radar{background:var(--ink);border-color:#fbbf24;color:#fff}
+.tab.cur.radar::after{color:#fbbf24}
+.tag.lock{background:#dff3e6;color:#15803d;font-size:11px;padding:3px 11px}
+.tag.rad{background:#fff1d6;color:#b45309;font-size:11px;padding:3px 11px}
+.dchip.radar{border-color:#e7c07a;background:#fff8ec}
+/* spot search */
+.spotsearch{margin:0 0 12px}
+.spotsearch input{width:100%;max-width:340px;background:#fcfaf5;border:1px solid var(--line2);border-radius:12px;
+  padding:9px 14px 9px 34px;font:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235d7a83' stroke-width='2'><circle cx='11' cy='11' r='7'/><path d='M21 21l-4-4'/></svg>");
+  background-repeat:no-repeat;background-position:10px center;background-size:15px}
+.spotsearch input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(15,180,196,.16);background-color:#fff}
+
+/* ---- v4: calm the orange, even out the type ---- */
+.sec .kicker{color:var(--teal-d)}
+.nav a:hover{border-color:var(--teal)}
+.btn{background:linear-gradient(95deg,var(--teal),var(--teal-d));color:#fff}
+.hero{background:radial-gradient(900px 380px at 88% -30%,rgba(15,180,196,.12),transparent 60%),linear-gradient(180deg,#e7f8fa 0%,#f1f8f2 45%,var(--sand) 100%)}
+body::before{background:
+  radial-gradient(680px 480px at 9% 5%,rgba(15,180,196,.10),transparent 62%),
+  radial-gradient(740px 520px at 95% 18%,rgba(15,180,196,.06),transparent 62%),
+  radial-gradient(900px 640px at 50% 120%,rgba(15,180,196,.06),transparent 60%)}
+/* radar = ONE clear amber cue (dashed border + tag); everything else neutral, locked stays green */
+.tab.radar{border-style:dashed;border-color:var(--line2);background:var(--card);color:var(--mut)}
+.tab.radar::after{content:"RADAR";color:#c2620c}
+.tab.radar:hover{border-color:var(--teal);color:var(--ink)}
+.tab.cur.radar{background:var(--ink);border-color:#c9d4dc;color:#fff}
+.tab.cur.radar::after{color:#fcd34d}
+.dchip.radar{border-style:dashed;border-color:var(--line2);background:var(--card)}
+.tag.rad{background:#fbe3c8;color:#b45309}
+/* readable, consistent prose sizes (data grids untouched to avoid overlap) */
+body{font-size:15px}
+.tagline{color:#234850}
+.sec .sintro{font-size:14px}
+.src .sdesc{font-size:12.5px;line-height:1.55}
+.call .det{font-size:13px}
+.foot{font-size:12px;line-height:1.75}
+.csub,.cform .cdesc{font-size:13px}
+.ethos p{font-size:14px}
+/* v5: swell-trains panel */
+.ec-cap{color:var(--teal-d)}
+.swlist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.swrow{display:grid;grid-template-columns:128px 1fr 158px;gap:10px;align-items:center;font-size:13px}
+.swk{color:var(--ink);font-weight:600}
+.swbar{height:16px;border-radius:6px;background:var(--sand2);overflow:hidden;position:relative}
+.swbar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.swm{color:var(--mut);text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:560px){.swrow{grid-template-columns:92px 1fr 118px;font-size:11.5px;gap:7px}}
+/* v6: detail day chips match the Best Spots day tabs */
+.dchip{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:7px 12px;min-width:66px;color:var(--mut);text-align:center;line-height:1.25}
+.dchip:hover{border-color:var(--teal);color:var(--ink)}
+.dchip b{display:block;font-size:12.5px;color:var(--ink)}
+.dchip small{font-size:10px;color:var(--mut2)}
+.dchip .dchsc{margin-top:3px}
+.dchip::after{content:"LOCKED";display:block;font-size:7px;font-weight:800;letter-spacing:.7px;margin-top:4px;color:#15803d}
+.dchip:not(.radar):not(.dsel){border-color:#bfe6cf}
+.dchip.radar{border-style:dashed;border-width:1.5px;border-color:var(--line2);background:var(--card)}
+.dchip.radar::after{content:"RADAR";color:#c2620c}
+.dchip.dsel{background:var(--ink);border-color:var(--ink);color:#fff}
+.dchip.dsel b{color:#fff}
+.dchip.dsel::after{color:#86efac}
+.dchip.dsel.radar{background:var(--ink);border-color:#c9d4dc}
+.dchip.dsel.radar::after{color:#fcd34d}
+/* v7: cut the pervasive orange (cross wind -> grey, onshore -> muted red) */
+.pw-cross{color:var(--mut)!important;font-weight:600}
+.pw-onshore{color:#dc2626!important}
+.glegend .wd.crz{background:#94a3b8}
+.glegend .wd.on{background:#dc2626}
+/* v8: cool the whole palette toward ocean/surf, kill the warm-sand "orange" feel */
+:root{--sand:#eef6f8;--sand2:#e1edf0;--line:#d7e6ea;--line2:#c2d6db;--tealwash:#e3f6f9}
+body{background:#eef6f8}
+.hero{background:radial-gradient(900px 400px at 85% -30%,rgba(15,180,196,.16),transparent 60%),linear-gradient(180deg,#dff3f6 0%,#e9f5f6 50%,var(--sand) 100%)}
+.brand .w::after,.brandrule{background:linear-gradient(90deg,#0fb4c4,#1f9bd0)}
+.btn{background:linear-gradient(95deg,var(--teal),var(--teal-d))}
+/* v9: readable wind key, tide split onto its own line */
+.glegend{font-size:12.5px;color:var(--mut);gap:7px 16px;align-items:center;margin-top:12px}
+.glegend .glab{color:var(--ink);font-weight:700;margin-right:4px}
+.glegend .wchip{display:inline-flex;align-items:center;gap:6px}
+.glegend .wd{width:13px;height:13px;margin:0}
+.gnote{font-size:12px;color:var(--mut);margin-top:7px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
+.gnote .tideln{display:inline-block;width:18px;height:3px;border-radius:2px;background:#0a6ebd;margin-right:6px;vertical-align:middle}
+.gnote .bwin{display:inline-block;width:18px;height:11px;border-radius:3px;background:#16a34a;opacity:.3;margin:0 6px 0 10px;vertical-align:middle}
+</style></head><body><header class="hero"><svg class="herobg" viewBox="0 0 1440 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M-20,80 C300,30 600,130 900,80 1200,34 1460,110 1460,110"/><path d="M-20,140 C320,92 580,190 920,140 1220,100 1460,170 1460,170"/><path d="M-20,200 C300,156 620,244 940,196 1240,154 1460,224 1460,224"/><path d="M-20,262 C340,216 600,300 900,252 1220,212 1460,282 1460,282"/></svg><div class="heroin"><h1 class="brand"><span class="w">Slabcast</span></h1><div class="brandrule"></div><p class="tagline"><b>An honest read on what's coming.</b> Free for every surfer. Ventura to San Onofre, scored fresh every morning.</p><div class="sub" id="sub"></div></div><svg class="hwave" viewBox="0 0 1440 46" preserveAspectRatio="none"><path class="l1" d="M0,30 C240,8 480,8 720,24 C960,40 1200,40 1440,20 L1440,46 L0,46 Z"/><path d="M0,34 C240,16 480,16 720,28 C960,40 1200,42 1440,26 L1440,46 L0,46 Z"/></svg></header><nav class="nav"><div class="navin"><span class="nbrand">Slabcast<span>~</span></span><a href="#forecast">Forecast</a><a href="#how">How it works</a><a href="#community">Add a spot</a><a href="#community">Requests</a></div></nav><main class="wrap"><section class="callbar" id="callbar"></section><div id="forecast" class="grid"><div class="card"><h2 id="maptitle">The Map</h2><div class="mapwrap"><svg id="map" viewBox="0 0 1000 860" xmlns="http://www.w3.org/2000/svg"><defs>
+ <linearGradient id="ocean" x1="0" y1="1" x2="0.9" y2="0.1">
+  <stop offset="0" stop-color="#06283a"/><stop offset="0.5" stop-color="#0c5570"/><stop offset="1" stop-color="#2f93ac"/></linearGradient>
+ <linearGradient id="land" x1="0" y1="0" x2="1" y2="0.15">
+  <stop offset="0" stop-color="#efe4ba"/><stop offset="0.09" stop-color="#dcd596"/><stop offset="0.24" stop-color="#aec173"/><stop offset="0.44" stop-color="#7aa755"/><stop offset="0.68" stop-color="#56853f"/><stop offset="0.86" stop-color="#3c6630"/><stop offset="1" stop-color="#2c4f27"/></linearGradient>
+ <radialGradient id="inland" cx="0.9" cy="0.5" r="0.8"><stop offset="0" stop-color="#24441f" stop-opacity="0.55"/><stop offset="0.6" stop-color="#24441f" stop-opacity="0"/></radialGradient>
+ <radialGradient id="glint" cx="0.32" cy="0.12" r="0.55">
+  <stop offset="0" stop-color="#bff3ff" stop-opacity="0.35"/><stop offset="1" stop-color="#bff3ff" stop-opacity="0"/></radialGradient>
+ <filter id="hill" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="13"/></filter>
+ <filter id="terr"><feTurbulence type="fractalNoise" baseFrequency="0.014 0.021" numOctaves="4" seed="11" stitchTiles="stitch" result="t"/>
+  <feColorMatrix in="t" type="matrix" values="0 0 0 0 0.30  0 0 0 0 0.42  0 0 0 0 0.20  0 0 0 0.55 0"/></filter>
+ <filter id="watr"><feTurbulence type="turbulence" baseFrequency="0.006 0.016" numOctaves="2" seed="4" result="t"/>
+  <feColorMatrix in="t" type="matrix" values="0 0 0 0 0.72  0 0 0 0 0.93  0 0 0 0 1  0 0 0 0.22 0"/></filter>
+ <filter id="pinsh" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="1.6" stdDeviation="2.2" flood-color="#031820" flood-opacity="0.55"/></filter>
+ <filter id="landsh" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="-2.5" dy="0" stdDeviation="4" flood-color="#042a3c" flood-opacity="0.5"/></filter>
+ <clipPath id="lc"><path d="M 94.0,55.1 L 152.0,105.9 L 189.3,156.7 L 243.1,226.6 L 284.6,277.5 L 334.3,296.5 L 384.0,322.0 L 442.0,309.3 L 491.7,302.9 L 520.7,322.0 L 537.3,391.9 L 553.9,474.5 L 562.1,506.3 L 599.4,512.6 L 645.0,506.3 L 674.0,493.5 L 703.0,519.0 L 723.7,550.7 L 744.4,576.2 L 773.4,588.9 L 814.9,633.4 L 839.7,671.5 L 864.6,690.5 L 885.3,696.9 L 906.0,716.0 L 930.9,754.1 L 1000,754.1 L 1000,0 L 94.0,0 Z"/></clipPath>
+</defs><g id="vp"><rect width="1000" height="860" fill="url(#ocean)"/><rect width="1000" height="860" filter="url(#watr)" opacity="0.5"/><rect width="1000" height="860" fill="url(#glint)"/><path d="M 77.0,64.1 L 135.0,114.9 L 172.3,165.7 L 226.1,235.6 L 267.6,286.5 L 317.3,305.5 L 367.0,331.0 L 425.0,318.3 L 474.7,311.9 L 503.70000000000005,331.0 L 520.3,400.9 L 536.9,483.5 L 545.1,515.3 L 582.4,521.6 L 628.0,515.3 L 657.0,502.5 L 686.0,528.0 L 706.7,559.7 L 727.4,585.2 L 756.4,597.9 L 797.9,642.4 L 822.7,680.5 L 847.6,699.5 L 868.3,705.9 L 889.0,725.0 L 913.9,763.1" fill="none" stroke="#8fdcec" stroke-width="1.2" opacity="0.127"/><path d="M 60.0,73.1 L 118.0,123.9 L 155.3,174.7 L 209.1,244.6 L 250.60000000000002,295.5 L 300.3,314.5 L 350.0,340.0 L 408.0,327.3 L 457.7,320.9 L 486.70000000000005,340.0 L 503.29999999999995,409.9 L 519.9,492.5 L 528.1,524.3 L 565.4,530.6 L 611.0,524.3 L 640.0,511.5 L 669.0,537.0 L 689.7,568.7 L 710.4,594.2 L 739.4,606.9 L 780.9,651.4 L 805.7,689.5 L 830.6,708.5 L 851.3,714.9 L 872.0,734.0 L 896.9,772.1" fill="none" stroke="#8fdcec" stroke-width="1.2" opacity="0.094"/><path d="M 43.0,82.1 L 101.0,132.9 L 138.3,183.7 L 192.1,253.6 L 233.60000000000002,304.5 L 283.3,323.5 L 333.0,349.0 L 391.0,336.3 L 440.7,329.9 L 469.70000000000005,349.0 L 486.29999999999995,418.9 L 502.9,501.5 L 511.1,533.3 L 548.4,539.6 L 594.0,533.3 L 623.0,520.5 L 652.0,546.0 L 672.7,577.7 L 693.4,603.2 L 722.4,615.9 L 763.9,660.4 L 788.7,698.5 L 813.6,717.5 L 834.3,723.9 L 855.0,743.0 L 879.9,781.1" fill="none" stroke="#8fdcec" stroke-width="1.2" opacity="0.061"/><path d="M 26.0,91.1 L 84.0,141.9 L 121.30000000000001,192.7 L 175.1,262.6 L 216.60000000000002,313.5 L 266.3,332.5 L 316.0,358.0 L 374.0,345.3 L 423.7,338.9 L 452.70000000000005,358.0 L 469.29999999999995,427.9 L 485.9,510.5 L 494.1,542.3 L 531.4,548.6 L 577.0,542.3 L 606.0,529.5 L 635.0,555.0 L 655.7,586.7 L 676.4,612.2 L 705.4,624.9 L 746.9,669.4 L 771.7,707.5 L 796.6,726.5 L 817.3,732.9 L 838.0,752.0 L 862.9,790.1" fill="none" stroke="#8fdcec" stroke-width="1.2" opacity="0.028"/><path d="M 94.0,55.1 L 152.0,105.9 L 189.3,156.7 L 243.1,226.6 L 284.6,277.5 L 334.3,296.5 L 384.0,322.0 L 442.0,309.3 L 491.7,302.9 L 520.7,322.0 L 537.3,391.9 L 553.9,474.5 L 562.1,506.3 L 599.4,512.6 L 645.0,506.3 L 674.0,493.5 L 703.0,519.0 L 723.7,550.7 L 744.4,576.2 L 773.4,588.9 L 814.9,633.4 L 839.7,671.5 L 864.6,690.5 L 885.3,696.9 L 906.0,716.0 L 930.9,754.1 L 1000,754.1 L 1000,0 L 94.0,0 Z" fill="url(#land)" stroke="#cdbb86" stroke-width="1" filter="url(#landsh)"/><g clip-path="url(#lc)"><rect width="1000" height="860" fill="url(#inland)"/><ellipse cx="250" cy="90" rx="150" ry="70" fill="#274d24" opacity="0.40" filter="url(#hill)"/><ellipse cx="560" cy="300" rx="180" ry="74" fill="#274d24" opacity="0.38" filter="url(#hill)"/><ellipse cx="690" cy="430" rx="120" ry="60" fill="#9ec577" opacity="0.18" filter="url(#hill)"/><ellipse cx="860" cy="560" rx="150" ry="66" fill="#274d24" opacity="0.40" filter="url(#hill)"/><ellipse cx="950" cy="770" rx="120" ry="64" fill="#22461f" opacity="0.44" filter="url(#hill)"/><ellipse cx="243.1" cy="67.8" rx="95" ry="52" fill="#3f6e37" opacity="0.55" filter="url(#hill)"/><ellipse cx="268.0" cy="42.4" rx="78" ry="38" fill="#9cc173" opacity="0.34" filter="url(#hill)"/><ellipse cx="417.1" cy="245.7" rx="150" ry="48" fill="#356630" opacity="0.6" filter="url(#hill)"/><ellipse cx="392.3" cy="220.3" rx="128" ry="34" fill="#9ec577" opacity="0.36" filter="url(#hill)"/><ellipse cx="495.9" cy="264.8" rx="96" ry="36" fill="#356630" opacity="0.5" filter="url(#hill)"/><ellipse cx="475.1" cy="245.7" rx="80" ry="26" fill="#9ec577" opacity="0.3" filter="url(#hill)"/><ellipse cx="570.4" cy="465.0" rx="58" ry="48" fill="#3f6e37" opacity="0.6" filter="url(#hill)"/><ellipse cx="558.0" cy="449.1" rx="44" ry="32" fill="#9cc173" opacity="0.34" filter="url(#hill)"/><ellipse cx="806.6" cy="493.5" rx="120" ry="64" fill="#3a6a33" opacity="0.5" filter="url(#hill)"/><ellipse cx="773.4" cy="468.1" rx="96" ry="44" fill="#93bd6c" opacity="0.3" filter="url(#hill)"/><ellipse cx="922.6" cy="709.6" rx="118" ry="68" fill="#356630" opacity="0.58" filter="url(#hill)"/><ellipse cx="893.6" cy="677.8" rx="92" ry="46" fill="#90ba69" opacity="0.32" filter="url(#hill)"/><path d="M 121.0,50.1 L 179.0,100.9 L 216.3,151.7 L 270.1,221.6 L 311.6,272.5 L 361.3,291.5 L 411.0,317.0 L 469.0,304.3 L 518.7,297.9 L 547.7,317.0 L 564.3,386.9 L 580.9,469.5 L 589.1,501.3 L 626.4,507.6 L 672.0,501.3 L 701.0,488.5 L 730.0,514.0 L 750.7,545.7 L 771.4,571.2 L 800.4,583.9 L 841.9,628.4 L 866.7,666.5 L 891.6,685.5 L 912.3,691.9 L 933.0,711.0 L 957.9,749.1" fill="none" stroke="#e6d6a4" stroke-width="34" opacity="0.5" filter="url(#hill)" stroke-linecap="round"/><rect width="1000" height="860" filter="url(#terr)" opacity="0.42"/><line x1="130" y1="0" x2="130" y2="860" stroke="#fff" stroke-width="1" opacity="0.035"/><line x1="290" y1="0" x2="290" y2="860" stroke="#fff" stroke-width="1" opacity="0.035"/><line x1="450" y1="0" x2="450" y2="860" stroke="#fff" stroke-width="1" opacity="0.035"/><line x1="610" y1="0" x2="610" y2="860" stroke="#fff" stroke-width="1" opacity="0.035"/><line x1="770" y1="0" x2="770" y2="860" stroke="#fff" stroke-width="1" opacity="0.035"/><line x1="930" y1="0" x2="930" y2="860" stroke="#fff" stroke-width="1" opacity="0.035"/><line x1="0" y1="130" x2="1000" y2="130" stroke="#fff" stroke-width="1" opacity="0.035"/><line x1="0" y1="290" x2="1000" y2="290" stroke="#fff" stroke-width="1" opacity="0.035"/><line x1="0" y1="450" x2="1000" y2="450" stroke="#fff" stroke-width="1" opacity="0.035"/><line x1="0" y1="610" x2="1000" y2="610" stroke="#fff" stroke-width="1" opacity="0.035"/><line x1="0" y1="770" x2="1000" y2="770" stroke="#fff" stroke-width="1" opacity="0.035"/></g><path d="M 94.0,55.1 L 152.0,105.9 L 189.3,156.7 L 243.1,226.6 L 284.6,277.5 L 334.3,296.5 L 384.0,322.0 L 442.0,309.3 L 491.7,302.9 L 520.7,322.0 L 537.3,391.9 L 553.9,474.5 L 562.1,506.3 L 599.4,512.6 L 645.0,506.3 L 674.0,493.5 L 703.0,519.0 L 723.7,550.7 L 744.4,576.2 L 773.4,588.9 L 814.9,633.4 L 839.7,671.5 L 864.6,690.5 L 885.3,696.9 L 906.0,716.0 L 930.9,754.1" fill="none" stroke="#bff3ff" stroke-width="6" opacity="0.25" stroke-linejoin="round"/><path d="M 94.0,55.1 L 152.0,105.9 L 189.3,156.7 L 243.1,226.6 L 284.6,277.5 L 334.3,296.5 L 384.0,322.0 L 442.0,309.3 L 491.7,302.9 L 520.7,322.0 L 537.3,391.9 L 553.9,474.5 L 562.1,506.3 L 599.4,512.6 L 645.0,506.3 L 674.0,493.5 L 703.0,519.0 L 723.7,550.7 L 744.4,576.2 L 773.4,588.9 L 814.9,633.4 L 839.7,671.5 L 864.6,690.5 L 885.3,696.9 L 906.0,716.0 L 930.9,754.1" fill="none" stroke="#f2ffff" stroke-width="2.4" opacity="0.92" stroke-linejoin="round"/><text x="205.3" y="159.7" font-size="11.5" fill="#2e3f1c" opacity="0.7" font-weight="700" letter-spacing="0.5">VENTURA</text><text x="466.3" y="305.9" font-size="11.5" fill="#2e3f1c" opacity="0.7" font-weight="700" letter-spacing="0.5">MALIBU</text><text x="569.9" y="413.9" font-size="11.5" fill="#2e3f1c" opacity="0.7" font-weight="700" letter-spacing="0.5">SOUTH BAY</text><text x="574.0" y="493.4" font-size="11.5" fill="#2e3f1c" opacity="0.7" font-weight="700" letter-spacing="0.5">PALOS VERDES</text><text x="735.6" y="547.4" font-size="11.5" fill="#2e3f1c" opacity="0.7" font-weight="700" letter-spacing="0.5">HUNTINGTON</text><text x="781.1" y="585.5" font-size="11.5" fill="#2e3f1c" opacity="0.7" font-weight="700" letter-spacing="0.5">NEWPORT</text><text x="905.4" y="699.9" font-size="11.5" fill="#2e3f1c" opacity="0.7" font-weight="700" letter-spacing="0.5">SAN CLEMENTE</text><text x="905" y="56" font-size="13" fill="#2e3f1c" opacity="0.8" font-weight="800" text-anchor="end" letter-spacing="1">CALIFORNIA</text><text x="60" y="800" font-size="13" fill="#cdeaf3" opacity="0.55" font-weight="700" letter-spacing="3" font-style="italic">PACIFIC OCEAN</text><g transform="translate(56,72)"><circle r="19" fill="#06283a" opacity="0.4"/><path d="M0,-14 L5,4 L0,-1 L-5,4 Z" fill="#eaffff"/><text x="0" y="-21" font-size="11" fill="#eaffff" text-anchor="middle" font-weight="800">N</text></g></g></svg><div class="zoomctl"><button id="zin" title="Zoom in">+</button><button id="zout" title="Zoom out">−</button><button id="zrst" title="Reset view">⤢</button></div><div class="maphint">+ / − to zoom · drag to pan</div></div><div class="legend" id="legend"></div></div><div class="card"><h2 class="fold">Region Swell Outlook, click a day <span class="arr">▾</span></h2><div class="foldbody"><div class="olist" id="outlook"></div></div></div></div><div class="card" style="margin-top:16px"><h2 class="fold">Best Spots By Day <span class="arr">▾</span></h2><div class="foldbody"><div class="tabs" id="tabs"></div><div class="dayhdr" id="dayhdr"></div><div class="spotsearch"><input id="spotsearch" type="search" placeholder="Search a spot or region…" autocomplete="off"></div><div class="tablewrap"><table id="tbl"><thead><tr><th>#</th><th>Spot</th><th>Region</th><th>Score</th><th>Window</th><th>Surf</th><th>Dir</th><th>Per</th><th>Wind</th><th>Tide</th></tr></thead><tbody id="tbody"></tbody></table></div></div></div><div class="card detail" id="detail"></div><section id="how" class="sec"><div class="kicker">How the forecast is built</div><div class="stitle">Many sources, blended into one honest read.</div><p class="sintro">Slabcast doesn't guess. Every break runs through the same model: swell fit, wind, and tide. We feed that model as many real, free, public sources as we can pull. More inputs, more confidence. Here's everything mixing into today's read:</p><div class="srcstats"><div class="stat"><b id="st-buoys">8</b><small>live ocean buoys feeding right now</small></div><div class="stat"><b id="st-spots">19</b><small>breaks scored hourly, Ventura to San Onofre</small></div><div class="stat"><b>5</b><small>forecast &amp; observation networks</small></div></div><div class="srcgrid"><div class="src"><div class="sname"><span class="ic" style="background:#0fb4c4"></span>Open-Meteo Marine</div><div class="sdesc">Global wave models (GWAM + a best-match swell ensemble), swell height, period and direction, hour by hour.</div></div><div class="src"><div class="sname"><span class="ic" style="background:#16a34a"></span>NOAA NDBC buoys</div><div class="sdesc">Real-time offshore buoy readings. The near-term forecast is bias-corrected toward what the buoys are actually measuring.</div></div><div class="src"><div class="sname"><span class="ic" style="background:#2f93ac"></span>CDIP buoys (Scripps)</div><div class="sdesc">Coastal Data Information Program nearshore wave buoys, a second live check on size and period close to shore.</div></div><div class="src"><div class="sname"><span class="ic" style="background:#a855f7"></span>NOAA CO-OPS tides</div><div class="sdesc">Exact hourly tide predictions per region, so each break is scored at its preferred tide stage.</div></div><div class="src"><div class="sname"><span class="ic" style="background:#ff6f5e"></span>Open-Meteo wind</div><div class="sdesc">Hourly wind speed and direction at every break, offshore, glassy, cross or onshore.</div></div></div><div class="buoynote">Live buoys feeding today's read: <div class="buoylist" id="buoylist"></div></div></section><section id="community" class="sec"><div class="kicker">Built with surfers</div><div class="stitle">Add a spot. Shape what's next.</div><p class="sintro">The whole point of Slabcast is to be as accurate as we possibly can, and the more feedback we get, the sharper it gets. Flag a break we should track or a fix we should make. Every submission lands straight in our inbox.</p><div class="formgrid"><form class="cform" data-kind="New spot submission">
+  <div class="ctitle">📍 Add a surf spot</div>
+  <div class="cdesc">Know a break we're missing? Send it, good ones get added to the map.</div>
+  <input class="hp" type="text" name="botcheck" tabindex="-1" autocomplete="off">
+  <label>Spot name *</label><input type="text" name="Spot name" required placeholder="e.g. Steamer Lane">
+  <label>Nearest town / region *</label><input type="text" name="Region" required placeholder="e.g. Santa Cruz">
+  <label>Coordinates (optional)</label><input type="text" name="Coordinates" placeholder="lat, lon if you know it">
+  <label>What makes it work</label><textarea name="Conditions" placeholder="Best swell direction, tide, wind, board, hazards..."></textarea>
+  <label>Your email (optional)</label><input type="email" name="email" placeholder="you@email.com">
+  <button class="btn" type="submit">Submit spot</button><div class="cmsg"></div>
+</form><form class="cform" data-kind="Feature request">
+  <div class="ctitle">💡 Request a feature or improvement</div>
+  <div class="cdesc">Spot something off, or want a feature? Your feedback is what makes the forecast more accurate. The more we hear, the better this gets.</div>
+  <input class="hp" type="text" name="botcheck" tabindex="-1" autocomplete="off">
+  <label>Your idea / request *</label><textarea name="Request" required placeholder="e.g. water temp, a 7-day chart, an alert when my spot fires..."></textarea>
+  <label>Which part of the site?</label><input type="text" name="Area" placeholder="map, table, mobile...">
+  <label>Your email (optional)</label><input type="email" name="email" placeholder="you@email.com">
+  <button class="btn" type="submit">Send request</button><div class="cmsg"></div>
+</form></div></section><section id="why" class="ethos"><h3>Why Slabcast exists</h3><p>Surfing is free. Anyone can paddle out. Slabcast runs on the same idea: an honest read on what's coming, for every surfer, with nothing in the way. No ads. No pop ups. No logins. No subscription. No data sold.</p><p>And no spin. We don't hype a flat day into a swell, and we don't talk down a good one. The score is the score. Check it against the buoys and your own eyes. Wind moves most inside 48 hours.</p><div class="ebadges"><span class="ebadge">no ads</span><span class="ebadge">no logins</span><span class="ebadge">no paywall</span><span class="ebadge">no hype</span><span class="ebadge">just the read</span></div></section><div class="foot" id="foot"></div></main><div id="tip"></div><script>
+const DATA = __SURF_DATA__;
+const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function pdate(s){const[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c);}
+function wd(s){return WD[pdate(s).getDay()];}
+function md(s){const d=pdate(s);return(d.getMonth()+1)+"/"+d.getDate();}
+function fh(h){if(h==null)return"";const p=h>=12?"p":"a";let x=h%12;if(x===0)x=12;return x+p;}
+function win(w){return w?fh(w.start)+" to "+fh(w.end):"";}
+function scoreColor(v){if(v>=78)return"#7c3aed";if(v>=70)return"#16a34a";if(v>=60)return"#38bdf8";if(v>=45)return"#1e3a8a";return"#94a3b8";}
+function scoreText(v){if(v>=70)return"#ffffff";if(v>=60)return"#06283a";if(v>=45)return"#ffffff";return"#0f1c2e";}
+function scoreWord(v){if(v>=78)return"Firing";if(v>=70)return"Good";if(v>=60)return"Fair";if(v>=45)return"Marginal";return"Flat";}
+const spots=DATA.spots;
+const dates=DATA.region.map(r=>r.date);              // ordered dates
+const dmeta=Object.fromEntries(DATA.region.map(r=>[r.date,r]));
+function spotDay(s,date){return s.days.find(d=>d.date===date);}
+
+document.getElementById("sub").textContent =
+  "Updated "+DATA.generated+"  ·  outlook "+md(DATA.weekStart)+" → "+md(DATA.weekEnd)+
+  "  ·  "+spots.length+" breaks, Ventura → San Onofre  ·  tuned for advanced / size";
+
+// ---- top call + radar (overall) -------------------------------------------
+const best=spots.reduce((a,b)=>b.bestScore>a.bestScore?b:a,spots[0]);
+const radar=spots.reduce((a,b)=>b.radarScore>a.radarScore?b:a,spots[0]);
+function callCard(cls,lab,s,sc,date,w){
+  return `<div class="call ${cls}"><div class="lab">${lab}</div>
+    <div class="big">${s.name}, ${date?wd(date)+" "+md(date):"TBD"}</div>
+    <div class="det">${w?`${w.faceFt} ft surf · ${w.swellDir} @ ${w.swellP}s · paddle ${win(w)} · wind ${w.wind}mph ${w.windDir} · ${w.tideState} tide`:"no clean window"} · score ${sc}</div></div>`;
+}
+document.getElementById("callbar").innerHTML =
+  callCard("go","▶ Go-to this week",best,best.bestScore,best.bestDate,best.bestWindow)+
+  callCard("radar","👁 On the radar (forming)",radar,radar.radarScore,radar.radarDate,radar.radarWindow);
+
+// ---- map -------------------------------------------------------------------
+const NS="http://www.w3.org/2000/svg";
+const map=document.getElementById("map");
+const vp=document.getElementById("vp");
+let K=1,TX=0,TY=0,dragging=false,moved=false,lastX=0,lastY=0;
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+const tip=document.getElementById("tip");
+const pinEls={};const labEls={};
+spots.forEach(s=>{
+  const c=el("circle",{class:"pin",cx:s.px,cy:s.py,r:9,fill:"#9aa9b8",stroke:"#fff","stroke-width":2,filter:"url(#pinsh)"});
+  c.addEventListener("mousemove",e=>{const d=spotDay(s,curDate);tip.style.opacity=1;tip.style.left=(e.clientX+14)+"px";tip.style.top=(e.clientY+14)+"px";
+    const sc=(d&&!d.nodata)?d.score:0;const col=scoreColor(sc);
+    let line3;
+    if(!d||d.nodata)line3="beyond model range";
+    else if(d.score<=0)line3="Flat";
+    else line3=`${d.window?d.window.faceFt+" ft surf · ":""}${scoreWord(d.score)}`;
+    tip.innerHTML=`<b style="color:${col}">${s.name}</b><br><span class="tcity">${s.region}</span><br><span style="color:${col};font-weight:700">${line3}</span>`;});
+  c.addEventListener("mouseleave",()=>tip.style.opacity=0);
+  c.addEventListener("click",()=>{if(!moved)showDetail(s.id);});
+  vp.appendChild(c);pinEls[s.id]=c;
+  const tl=el("text",{class:"pinlabel",x:s.px-12,y:s.py+3,"text-anchor":"end"});tl.textContent="";vp.appendChild(tl);labEls[s.id]=tl;
+});
+document.getElementById("legend").innerHTML=[["#7c3aed","Firing 78+"],["#16a34a","Good 70s"],["#38bdf8","Fair 60s"],["#1e3a8a","Marginal"],["#94a3b8","Flat / n/a"]]
+  .map(([c,l])=>`<span><span class="dot" style="background:${c}"></span>${l}</span>`).join("");
+function recolorMap(){
+  spots.forEach(s=>{const d=spotDay(s,curDate);const sc=(d&&!d.nodata)?d.score:0;
+    pinEls[s.id].setAttribute("fill",scoreColor(sc));
+    pinEls[s.id].setAttribute("r",sc>=70?10:9);
+    pinEls[s.id].setAttribute("stroke",(sc>0&&sc<45)?"#1d2c3e":"#fff");});
+  sizePins();
+}
+// ---- zoom + pan (dots & labels scale proportionally with zoom) -------------
+// Counter-scale pins & labels by 1/K so they stay a constant on-screen size:
+// zooming then spreads the geographic positions apart and de-clutters tight
+// clusters (South Bay) instead of inflating them. Labels appear as you zoom in.
+function sizePins(){spots.forEach(s=>{const d=spotDay(s,curDate);const sc=(d&&!d.nodata)?d.score:0;
+  const base=sc>=70?10:9,p=pinEls[s.id],l=labEls[s.id];
+  p.setAttribute("r",base/K);p.setAttribute("stroke-width",2/K);
+  l.style.fontSize=(10.5/K)+"px";l.style.strokeWidth=(2.4/K)+"px";
+  l.setAttribute("x",s.px-12/K);l.setAttribute("y",s.py+3/K);
+  l.textContent=(K>1.9||sc>=78)?s.name.split(" ")[0]:"";});}
+function applyVP(){vp.setAttribute("transform",`translate(${TX} ${TY}) scale(${K})`);}
+function clampPan(){TX=Math.min(0,Math.max(1000*(1-K),TX));TY=Math.min(0,Math.max(860*(1-K),TY));}
+function svgPt(e){const r=map.getBoundingClientRect();return [(e.clientX-r.left)/r.width*1000,(e.clientY-r.top)/r.height*860];}
+function zoomTo(sx,sy,nk){nk=Math.min(7,Math.max(1,nk));TX=sx-(sx-TX)*(nk/K);TY=sy-(sy-TY)*(nk/K);K=nk;clampPan();applyVP();sizePins();}
+/* trackpad/scroll-wheel zoom disabled by design: use the +/- buttons */
+map.addEventListener("mousedown",e=>{dragging=true;moved=false;lastX=e.clientX;lastY=e.clientY;map.classList.add("drag");});
+window.addEventListener("mousemove",e=>{if(!dragging)return;const r=map.getBoundingClientRect();
+  if(Math.abs(e.clientX-lastX)+Math.abs(e.clientY-lastY)>3){moved=true;tip.style.opacity=0;}
+  TX+=(e.clientX-lastX)/r.width*1000;TY+=(e.clientY-lastY)/r.height*860;lastX=e.clientX;lastY=e.clientY;clampPan();applyVP();});
+window.addEventListener("mouseup",()=>{dragging=false;map.classList.remove("drag");});
+document.getElementById("zin").onclick=()=>zoomTo(500,430,K*1.45);
+document.getElementById("zout").onclick=()=>zoomTo(500,430,K/1.45);
+document.getElementById("zrst").onclick=()=>{K=1;TX=0;TY=0;applyVP();sizePins();};
+
+// ---- outlook strip (clickable -> sets day) --------------------------------
+const reg=DATA.region;const maxH=Math.max(...reg.map(r=>r.maxH),3);
+function renderOutlook(){
+  let oh="";let split=false;
+  reg.forEach(r=>{
+    if(!r.confident&&!split){oh+=`<div class="divider">On the radar · lower confidence ▾</div>`;split=true;}
+    const nd=(!r.maxH||r.maxPer==null);
+    const pct=nd?0:Math.round(r.maxH/maxH*100);
+    const col=r.confident?scoreColor(60+Math.min(35,r.maxH*6)):"#15406e";
+    const meta=nd?`<span class="muted" style="font-size:11px">beyond model</span>`:`${r.maxH}ft ${r.domDirC}<br><small>${r.maxPer}s</small>`;
+    oh+=`<div class="orow ${r.confident?"":"oradar"} ${nd?"muted":""} ${r.date===curDate?"cur":""}" data-date="${r.date}">
+      <div class="odate">${wd(r.date)}<small>${md(r.date)}</small></div>
+      <div class="obar"><i style="width:${pct}%;background:${col}"></i></div>
+      <div class="ometa">${meta}</div></div>`;
+  });
+  oh+=`<div class="divider">Beyond ~10 days = past model range. Re-checks daily.</div>`;
+  const o=document.getElementById("outlook");o.innerHTML=oh;
+  o.querySelectorAll(".orow").forEach(r=>r.onclick=()=>setDay(r.dataset.date));
+}
+
+// ---- day tabs --------------------------------------------------------------
+function dayTopScore(date){return Math.max(0,...spots.map(s=>{const d=spotDay(s,date);return(d&&!d.nodata)?d.score:0;}));}
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=dates.map(dt=>{
+    const top=dayTopScore(dt);const r=dmeta[dt];
+    return `<div class="tab ${dt===curDate?"cur":""} ${r.confident?"":"radar"}" data-date="${dt}">
+      <b>${wd(dt)}</b><small>${md(dt)}</small>
+      <span class="tsc" style="background:${scoreColor(top)}"></span></div>`;}).join("");
+  document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>setDay(t.dataset.date));
+}
+
+// ---- per-day ranked table --------------------------------------------------
+function renderTable(){
+  const r=dmeta[curDate];
+  document.getElementById("maptitle").textContent="The Map, "+wd(curDate)+" "+md(curDate)+" (hover/click a break)";
+  document.getElementById("dayhdr").innerHTML=
+    `${wd(curDate)} ${md(curDate)}, best spots`+
+    `<span class="tag ${r.confident?"lock":"rad"}">${r.confident?"locked-in":"radar · lower confidence"}</span>`+
+    ` <span class="muted" style="font-weight:500">· swell ${r.maxH}ft ${r.domDirC} @ ${r.maxPer}s</span>`;
+  let rows=spots.map(s=>({s,d:spotDay(s,curDate)}))
+    .filter(x=>x.d&&!x.d.nodata)
+    .sort((a,b)=>b.d.score-a.d.score);
+  const body=rows.map((x,i)=>{const s=x.s,d=x.d,w=d.window;
+    return `<tr class="spotrow ${s.id===curId?"sel":""}" data-id="${s.id}">
+      <td>${d.score>0?i+1:"·"}</td><td><b>${s.name}</b></td><td class="rgn">${s.region}</td>
+      <td><span class="score" style="background:${scoreColor(d.score)};color:${scoreText(d.score)}">${d.score}</span></td>
+      <td>${w?win(w):'<span class="flat">no window</span>'}</td>
+      <td>${w?(w.faceFt+"ft"):"TBD"}</td><td>${w?w.swellDir:"TBD"}</td><td>${w?w.swellP+"s":"TBD"}</td>
+      <td>${w?w.wind+" "+w.windDir:"TBD"}</td><td>${w?w.tideState:"TBD"}</td></tr>`;}).join("");
+  document.getElementById("tbody").innerHTML=body||`<tr><td colspan="10" class="flat">No spots working this day.</td></tr>`;
+  document.querySelectorAll(".spotrow").forEach(tr=>tr.onclick=()=>showDetail(tr.dataset.id));
+}
+
+// ---- selected-day controller ----------------------------------------------
+let curDate=best.bestDate||dates[0];
+function setDay(dt){curDate=dt;recolorMap();renderTabs();renderOutlook();renderTable();if(curId){detailDate=dt;const _s=spots.find(x=>x.id===curId);if(_s)renderDetail(_s);}}
+
+// ---- spot detail (full outlook, click a day to jump) -----------------------
+let curId=null;let detailDate=null;
+function showDetail(id){
+  curId=id;const s=spots.find(x=>x.id===id);
+  document.querySelectorAll(".spotrow").forEach(tr=>tr.classList.toggle("sel",tr.dataset.id===id));
+  detailDate=curDate;
+  renderDetail(s);
+  renderTable();
+}
+const WCOL={offshore:"#16a34a",glassy:"#38bdf8",cross:"#94a3b8",onshore:"#dc2626"};
+function renderDetail(s){
+  const chips=s.days.map(d=>{
+    const sc=(d&&!d.nodata)?d.score:0;
+    const col=d.nodata?"#9aa9b8":scoreColor(sc);
+    return `<button class="dchip ${d.date===detailDate?"dsel":""} ${(dmeta[d.date]&&dmeta[d.date].confident)?"":"radar"}" data-date="${d.date}">
+      <b>${wd(d.date)}</b><small>${md(d.date)}</small>
+      <span class="dchsc" style="background:${col};color:${d.nodata?'#fff':scoreText(sc)}">${d.nodata?' to ':sc}</span></button>`;}).join("");
+  const day=s.days.find(d=>d.date===detailDate);
+  let body;
+  if(!day||day.nodata||!day.hours||!day.hours.length){
+    body=`<div class="flat" style="padding:14px 2px">${day&&day.nodata?"Beyond model range":"Flat / wrong swell window"} on ${wd(detailDate)} ${md(detailDate)}, no surfable hours.</div>`;
+  } else { body=planner(s,day); }
+  document.getElementById("detail").innerHTML=`<h2>${s.name} · <span class="rgn">${s.region} · ${s.type}</span></h2>
+    <div style="font-size:13px;color:#33455a;margin:2px 0 6px">${s.note}</div>
+    ${s.board?`<div style="font-size:12.5px;color:#1d4ed8;margin:0 0 6px">🏄 ${s.board}</div>`:""}
+    <div style="font-size:12px" class="hazard">⚠ ${s.hazard}</div>
+    <div class="dchips">${chips}</div>
+    <div class="report"><b class="tk">📋 The take , </b> ${spotReport(s,day)}</div>
+    ${energyChart(s)}${body}
+    <div class="muted" style="font-size:11px;margin-top:8px">Pick a day. Planner shows each daylight hour's score, est. breaking face height, wind, tide &amp; swell energy (kJ), green band = best paddle-out window. "Surf" = the actual wave size you'd ride (≈ swell × period/spot factor); the energy chart above uses raw open-ocean swell. Dashed chip = lower-confidence (4+ days out).</div>`;
+  document.querySelectorAll("#detail .dchip").forEach(c=>c.onclick=()=>{detailDate=c.dataset.date;renderDetail(s);});
+}
+function planner(s,day){
+  const hrs=day.hours,w=day.window;
+  const peakE=Math.max(0,...hrs.map(h=>h.e||0));
+  const rows=hrs.map(h=>{
+    const inw=(w&&h.h>=w.start&&h.h<w.end)?"besth":"";
+    return `<div class="prow ${inw}">
+      <div class="ph">${fh(h.h)}</div>
+      <div class="pbar"><i style="width:${Math.max(4,Math.min(100,h.score))}%;background:${scoreColor(h.score)}"></i><span>${h.score}</span></div>
+      <div class="pm">${h.face}ft</div>
+      <div class="pm pw-${h.wt}">${h.wind!=null?h.wind+"k "+h.windDir:" to "}</div>
+      <div class="pm">${h.tide!=null?h.tide.toFixed(1):" to "}</div>
+      <div class="pm">${h.e||0}</div></div>`;}).join("");
+  return `<div class="planhdr"><b>${wd(day.date)} ${md(day.date)}</b> · paddle-out <b>${w?win(w):"TBD"}</b> · ${w?w.faceFt+"ft surf · "+w.swellDir+" @ "+w.swellP+"s ("+w.swellH+"ft swell)":"TBD"} · peak <b>${peakE} kJ</b></div>
+    ${tgraph(hrs,w)}
+    <div class="planner"><div class="prow phead"><div class="ph">hr</div><div class="pbar">score</div><div class="pm">surf</div><div class="pm">wind</div><div class="pm">tide ft</div><div class="pm">kJ</div></div>${rows}</div>`;
+}
+function sizeWords(ft){if(ft==null)return"flat";if(ft<2)return"ankle-to-knee";if(ft<3)return"knee-to-waist";if(ft<4)return"waist-to-chest high";if(ft<5)return"chest-high";if(ft<6)return"shoulder-to-head high";if(ft<8)return"head-high and overhead";return"well overhead";}
+function cap(t){return t?t.charAt(0).toUpperCase()+t.slice(1):t;}
+function spotReport(s,day){
+  if(!day||day.nodata||!day.window){
+    return `Outside ${s.name}'s swell window right now, wrong direction or simply flat. Pick a day with a colored chip above to see when it turns on.`;
+  }
+  const w=day.window,hrs=day.hours||[];
+  const sw=scoreWord(day.score).toLowerCase();
+  const amW=hrs.length?hrs[0].wt:null;
+  let turn=null;for(let i=1;i<hrs.length;i++){if(hrs[i].wt!==amW){turn=hrs[i];break;}}
+  const amTxt=amW==='glassy'?'glassy':amW==='offshore'?'light offshore':amW==='cross'?'cross-shore':amW==='onshore'?'onshore':'';
+  let windPhrase=amTxt?`${cap(amTxt)} early`+(turn?`, going ${turn.wt} around ${fh(turn.h)}`:`, holding through the session`):"";
+  const t0=hrs.length?hrs[0].tide:null,tL=hrs.length?hrs[hrs.length-1].tide:null;
+  let tidePhrase=(t0!=null&&tL!=null)?(tL>t0?`tide filling through the day`:`tide draining off the morning high`):"";
+  if(t0!=null&&t0<0)tidePhrase=`dawn sits on a draining negative tide, so give it until mid-morning`;
+  let bestUp=null;s.days.forEach(d=>{if(!d.nodata&&d.window&&(bestUp===null||d.score>bestUp.score))bestUp=d;});
+  let trend="";
+  if(bestUp){trend=(bestUp.date===day.date)?`This is about the best window of the run.`:`Trending up toward ${wd(bestUp.date)} ${md(bestUp.date)}, the standout at ${sizeWords(bestUp.window.faceFt)} faces.`;}
+  const bl=s.board?s.board:"";
+  return `${cap(sizeWords(w.faceFt))} faces on the ${w.swellDir} swell, about <b>${w.faceFt} ft</b> of surf (${w.swellH} ft swell @ ${w.swellP}s), looking <b>${sw}</b>. ${windPhrase?windPhrase+'. ':''}Best window <b>${win(w)}</b>${tidePhrase?', '+tidePhrase:''}. ${trend} ${bl?'<i>Board: '+bl+'</i>':''}`;
+}
+function energyChart(s){
+  const day=s.days.find(d=>d.date===detailDate)||s.days[0];
+  const sw=(day&&day.swells)?day.swells:[];
+  const when=day?wd(day.date)+" "+md(day.date):"";
+  if(!sw.length){return `<div class="ec"><div class="ec-cap">Swell trains · ${when}</div><div class="muted" style="font-size:12px;padding:6px 2px">No separated swell data for this day.</div></div>`;}
+  const mx=Math.max(...sw.map(t=>t.h),1);
+  const COL={"Primary swell":"#0fb4c4","Secondary swell":"#7c3aed","Windswell":"#94a3b8"};
+  const rows=sw.map(t=>{const w=Math.max(7,Math.round(t.h/mx*100));const col=(t.q!=null)?scoreColor(t.q):"#94a3b8";return `<div class="swrow"><div class="swk">${t.kind}</div><div class="swbar"><i style="width:${w}%;background:${col}"></i></div><div class="swm">${t.h} ft ${t.dc||""} @ ${t.p!=null?t.p+"s":"--"}</div></div>`;}).join("");
+  return `<div class="ec"><div class="ec-cap">Swell trains · ${when} (the separate swells in the water)</div><div class="swlist">${rows}</div></div>`;
+}
+function tgraph(hrs,w){
+  // SVG holds only shapes (curve/area/window band) and stretches cleanly to any
+  // width via preserveAspectRatio="none"; the tide line uses a non-scaling stroke
+  // so it stays crisp. Wind dots + hour labels are evenly-spaced HTML rows below
+  // (cell-aligned to the curve), so nothing distorts or overlaps.
+  const VW=1000,VH=100,pT=10,pB=10,n=hrs.length;
+  const tv=hrs.map(h=>h.tide==null?0:h.tide),tmin=Math.min(...tv),tmax=Math.max(...tv,tmin+1);
+  const Xi=i=>((i+0.5)/n)*VW;
+  const Y=t=>pT+(1-(t-tmin)/((tmax-tmin)||1))*(VH-pT-pB);
+  const pts=hrs.map((h,i)=>`${Xi(i).toFixed(1)},${Y(h.tide==null?tmin:h.tide).toFixed(1)}`).join(" ");
+  const area=`${Xi(0).toFixed(1)},${VH} ${pts} ${Xi(n-1).toFixed(1)},${VH}`;
+  let band="";
+  if(w){let si=hrs.findIndex(h=>h.h>=w.start);let ei=hrs.findIndex(h=>h.h>=w.end);
+    if(si<0)si=0; if(ei<0)ei=n;
+    const bx=(si/n)*VW, bw=Math.max(4,((ei-si)/n)*VW);
+    band=`<rect x="${bx.toFixed(1)}" y="0" width="${bw.toFixed(1)}" height="${VH}" fill="#16a34a" opacity="0.13"/>`;}
+  const winddots=hrs.map(h=>`<span><i style="background:${WCOL[h.wt]||'#94a3b8'}"></i></span>`).join("");
+  const hourlbl=hrs.map((h,i)=>`<span>${i%2===0?fh(h.h):""}</span>`).join("");
+  return `<div class="tg">
+    <svg class="tg-svg" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="none">${band}
+      <polyline points="${area}" fill="#9fc7e6" opacity="0.45"/>
+      <polyline points="${pts}" fill="none" stroke="#0a6ebd" stroke-width="2.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+    <div class="tg-yax" style="top:5px">${tmax.toFixed(1)} ft</div>
+    <div class="tg-yax" style="top:108px">${tmin.toFixed(1)} ft</div>
+    <div class="tg-row tg-wind">${winddots}</div>
+    <div class="tg-row tg-hours">${hourlbl}</div>
+  </div>
+  <div class="glegend"><b class="glab">Wind</b><span class="wchip"><i class="wd off"></i>offshore</span><span class="wchip"><i class="wd glz"></i>glassy</span><span class="wchip"><i class="wd crz"></i>cross</span><span class="wchip"><i class="wd on"></i>onshore</span></div><div class="gnote"><span class="tideln"></span>blue line = tide<span class="bwin"></span>best paddle-out window</div>`;
+}
+
+// ---- collapse/expand any foldable card -------------------------------------
+document.addEventListener("click",e=>{const f=e.target.closest(".fold");
+  if(f&&f.closest(".card"))f.closest(".card").classList.toggle("closed");});
+
+// ---- boot ------------------------------------------------------------------
+setDay(curDate);
+showDetail(best.id);
+
+document.getElementById("foot").innerHTML=
+ "<b>How it works:</b> Each break is scored hourly on swell fit (does the swell direction/size/period match what THAT break needs), wind (offshore vs onshore + strength), and tide (the spot's preferred stage). The best daylight window each day is its paddle-out call. Pick a day above, the map recolors and the table ranks the best spots for that day. The radar/outlook flags bigger swells forming further out (eye on them, confirm the following Monday).<br>"+
+ "<b>Range:</b> Ventura → San Onofre. <b>Sources:</b> Open-Meteo Marine (swell) + Open-Meteo (wind) + NOAA CO-OPS tide predictions. Free, no login. Cross-check the marquee day vs Surfline/buoys before a long drive, wind moves most inside 48h.<br>"+
+ "<b>Refresh:</b> Rebuilds automatically every morning around 3 AM Pacific, the read you see is always current.";
+</script><script>
+// live sources: pull the actual buoys feeding this build out of DATA
+(function(){
+  try{
+    var b=DATA.buoys||[];
+    var sb=document.getElementById("st-buoys"); if(sb) sb.textContent=b.length;
+    var ss=document.getElementById("st-spots"); if(ss) ss.textContent=(DATA.spots||[]).length;
+    var bl=document.getElementById("buoylist");
+    if(bl) bl.innerHTML=b.map(function(x){return '<span class="buoychip">'+x.name+' · <b>'+x.h+'ft</b> '+x.dirC+' @ '+x.period+'s</span>';}).join("");
+  }catch(e){}
+})();
+// search filter for Best Spots By Day (DOM-level; engine untouched, re-applies on day change)
+(function(){
+  var inp=document.getElementById("spotsearch"); if(!inp) return;
+  var tb=document.getElementById("tbody"); if(!tb) return;
+  function apply(){var q=inp.value.trim().toLowerCase();
+    tb.querySelectorAll("tr").forEach(function(tr){
+      tr.style.display=(!q||tr.textContent.toLowerCase().indexOf(q)>-1)?"":"none";});}
+  inp.addEventListener("input",apply);
+  new MutationObserver(apply).observe(tb,{childList:true});
+})();
+// community forms -> Web3Forms (your email stays server-side; only the public key ships)
+const W3F_KEY="__WEB3FORMS_KEY__";
+document.querySelectorAll(".cform").forEach(function(f){
+  f.addEventListener("submit",async function(e){
+    e.preventDefault();
+    var msg=f.querySelector(".cmsg"), btn=f.querySelector(".btn");
+    msg.className="cmsg";
+    if(W3F_KEY.indexOf("__")===0){msg.className="cmsg err";msg.textContent="Form isn't switched on yet, add the Web3Forms key to go live.";return;}
+    var fd=new FormData(f);
+    fd.append("access_key",W3F_KEY);
+    fd.append("subject","SLABCAST · "+f.dataset.kind);
+    fd.append("from_name","SLABCAST site");
+    btn.disabled=true;var old=btn.textContent;btn.textContent="Sending...";
+    try{
+      var r=await fetch("https://api.web3forms.com/submit",{method:"POST",body:fd});
+      var j=await r.json();
+      if(j.success){f.reset();msg.className="cmsg ok";msg.textContent="✅ Got it, thanks! We read every one.";}
+      else{msg.className="cmsg err";msg.textContent="That didn't send, try again in a sec.";}
+    }catch(_){msg.className="cmsg err";msg.textContent="Network hiccup, try again.";}
+    btn.disabled=false;btn.textContent=old;
+  });
+});
+</script></body></html>
