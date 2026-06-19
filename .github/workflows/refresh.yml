@@ -1,0 +1,41 @@
+name: Refresh SLABCAST
+
+on:
+  schedule:
+    # 10:00 UTC = 3:00 AM Pacific Daylight (summer) / 2:00 AM Pacific Standard (winter)
+    - cron: "0 10 * * *"
+  workflow_dispatch:   # lets you trigger a rebuild by hand from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install optional deps
+        run: pip install requests
+      - name: Generate dashboard
+        run: python3 surf_refresh.py
+      - name: Stage site
+        run: |
+          mkdir -p _site
+          cp index.html _site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4
