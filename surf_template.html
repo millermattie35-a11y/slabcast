@@ -616,23 +616,22 @@ document.getElementById("foot").innerHTML=
   inp.addEventListener("input",apply);
   new MutationObserver(apply).observe(tb,{childList:true});
 })();
-// community forms -> Web3Forms (your email stays server-side; only the public key ships)
-const W3F_KEY="__WEB3FORMS_KEY__";
+// community forms -> FormSubmit (no account, no key; first submission triggers a one-time activation email)
+const FS_EMAIL="millermattie35@gmail.com";
 document.querySelectorAll(".cform").forEach(function(f){
   f.addEventListener("submit",async function(e){
     e.preventDefault();
     var msg=f.querySelector(".cmsg"), btn=f.querySelector(".btn");
     msg.className="cmsg";
-    if(W3F_KEY.indexOf("__")===0){msg.className="cmsg err";msg.textContent="Form isn't switched on yet, add the Web3Forms key to go live.";return;}
     var fd=new FormData(f);
-    fd.append("access_key",W3F_KEY);
-    fd.append("subject","SLABCAST · "+f.dataset.kind);
-    fd.append("from_name","SLABCAST site");
+    fd.append("_subject","SLABCAST · "+f.dataset.kind);
+    fd.append("_captcha","false");
+    fd.append("_template","table");
     btn.disabled=true;var old=btn.textContent;btn.textContent="Sending...";
     try{
-      var r=await fetch("https://api.web3forms.com/submit",{method:"POST",body:fd});
+      var r=await fetch("https://formsubmit.co/ajax/"+FS_EMAIL,{method:"POST",headers:{"Accept":"application/json"},body:fd});
       var j=await r.json();
-      if(j.success){f.reset();msg.className="cmsg ok";msg.textContent="✅ Got it, thanks! We read every one.";}
+      if(j.success==="true"||j.success===true){f.reset();msg.className="cmsg ok";msg.textContent="✅ Got it, thanks! We read every one.";}
       else{msg.className="cmsg err";msg.textContent="That didn't send, try again in a sec.";}
     }catch(_){msg.className="cmsg err";msg.textContent="Network hiccup, try again.";}
     btn.disabled=false;btn.textContent=old;
