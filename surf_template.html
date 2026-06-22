@@ -296,6 +296,14 @@ body{background:#eef6f8}
 .gnote{font-size:12px;color:var(--mut);margin-top:7px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
 .gnote .tideln{display:inline-block;width:18px;height:3px;border-radius:2px;background:#0a6ebd;margin-right:6px;vertical-align:middle}
 .gnote .bwin{display:inline-block;width:18px;height:11px;border-radius:3px;background:#16a34a;opacity:.3;margin:0 6px 0 10px;vertical-align:middle}
+/* v10: favorites stars + filter */
+.spotsearch{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.favstar{cursor:pointer;margin-right:8px;font-size:15px;line-height:1;user-select:none;color:var(--mut2)}
+.favstar.on{color:#f5b301}
+.favstar:hover{color:#f5b301}
+.favtoggle{border:1px solid var(--line2);background:var(--card);color:var(--mut);border-radius:11px;padding:9px 13px;font:inherit;font-size:13px;cursor:pointer}
+.favtoggle:hover{border-color:var(--teal);color:var(--ink)}
+.favtoggle.on{background:#f5b301;border-color:#f5b301;color:#3a2e00;font-weight:700}
 </style></head><body><header class="hero"><svg class="herobg" viewBox="0 0 1440 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M-20,80 C300,30 600,130 900,80 1200,34 1460,110 1460,110"/><path d="M-20,140 C320,92 580,190 920,140 1220,100 1460,170 1460,170"/><path d="M-20,200 C300,156 620,244 940,196 1240,154 1460,224 1460,224"/><path d="M-20,262 C340,216 600,300 900,252 1220,212 1460,282 1460,282"/></svg><div class="heroin"><h1 class="brand"><span class="w">Slabcast</span></h1><div class="brandrule"></div><p class="tagline"><b>An honest read on what's coming.</b> Free for every surfer. Ventura to San Onofre, scored fresh every morning.</p><div class="sub" id="sub"></div></div><svg class="hwave" viewBox="0 0 1440 46" preserveAspectRatio="none"><path class="l1" d="M0,30 C240,8 480,8 720,24 C960,40 1200,40 1440,20 L1440,46 L0,46 Z"/><path d="M0,34 C240,16 480,16 720,28 C960,40 1200,42 1440,26 L1440,46 L0,46 Z"/></svg></header><nav class="nav"><div class="navin"><span class="nbrand">Slabcast<span>~</span></span><a href="#forecast">Forecast</a><a href="#how">How it works</a><a href="#community">Add a spot</a><a href="#community">Requests</a></div></nav><main class="wrap"><section class="callbar" id="callbar"></section><div id="forecast" class="grid"><div class="card"><h2 id="maptitle">The Map</h2><div class="mapwrap"><svg id="map" viewBox="0 0 1000 860" xmlns="http://www.w3.org/2000/svg"><defs>
  <linearGradient id="ocean" x1="0" y1="1" x2="0.9" y2="0.1">
   <stop offset="0" stop-color="#06283a"/><stop offset="0.5" stop-color="#0c5570"/><stop offset="1" stop-color="#2f93ac"/></linearGradient>
@@ -606,15 +614,42 @@ document.getElementById("foot").innerHTML=
     if(bl) bl.innerHTML=b.map(function(x){return '<span class="buoychip">'+x.name+' · <b>'+x.h+'ft</b> '+x.dirC+' @ '+x.period+'s</span>';}).join("");
   }catch(e){}
 })();
-// search filter for Best Spots By Day (DOM-level; engine untouched, re-applies on day change)
+// Best Spots: tappable favorite stars + "favorites only" filter + text search (all client-side; engine untouched)
 (function(){
-  var inp=document.getElementById("spotsearch"); if(!inp) return;
   var tb=document.getElementById("tbody"); if(!tb) return;
-  function apply(){var q=inp.value.trim().toLowerCase();
-    tb.querySelectorAll("tr").forEach(function(tr){
-      tr.style.display=(!q||tr.textContent.toLowerCase().indexOf(q)>-1)?"":"none";});}
-  inp.addEventListener("input",apply);
-  new MutationObserver(apply).observe(tb,{childList:true});
+  var inp=document.getElementById("spotsearch");
+  var DEF=["hermosa","elporto","sano","uppers","redondobw","huntington","haggertys","staircase","lowerjetties"];
+  var KEY="slabcast_favs";
+  function load(){try{var v=JSON.parse(localStorage.getItem(KEY));return Array.isArray(v)?v:DEF.slice();}catch(_){return DEF.slice();}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(favs));}catch(_){}}
+  var favs=load(), favOnly=false;
+  function isFav(id){return favs.indexOf(id)>-1;}
+  function toggle(id){var i=favs.indexOf(id); if(i>-1){favs.splice(i,1);}else{favs.push(id);} save(); decorate(); applyFilters();}
+  var ss=document.querySelector(".spotsearch");
+  if(ss){var fb=document.createElement("button");fb.type="button";fb.className="favtoggle";fb.textContent="★ Favorites only";
+    fb.onclick=function(){favOnly=!favOnly;fb.classList.toggle("on",favOnly);applyFilters();};ss.appendChild(fb);}
+  function decorate(){
+    tb.querySelectorAll("tr.spotrow").forEach(function(tr){
+      var id=tr.dataset.id, cell=tr.querySelector("td:nth-child(2)"); if(!cell)return;
+      var star=cell.querySelector(".favstar");
+      if(!star){star=document.createElement("span");star.className="favstar";
+        star.onclick=function(e){e.stopPropagation();toggle(id);};
+        cell.insertBefore(star,cell.firstChild);}
+      star.textContent=isFav(id)?"★":"☆";
+      star.classList.toggle("on",isFav(id));
+    });
+  }
+  function applyFilters(){
+    var q=(inp?inp.value.trim().toLowerCase():"");
+    tb.querySelectorAll("tr.spotrow").forEach(function(tr){
+      var okText=(!q||tr.textContent.toLowerCase().indexOf(q)>-1);
+      var okFav=(!favOnly||isFav(tr.dataset.id));
+      tr.style.display=(okText&&okFav)?"":"none";
+    });
+  }
+  if(inp)inp.addEventListener("input",applyFilters);
+  new MutationObserver(function(){decorate();applyFilters();}).observe(tb,{childList:true});
+  decorate();applyFilters();
 })();
 // community forms -> FormSubmit (no account, no key; first submission triggers a one-time activation email)
 const FS_EMAIL="millermattie35@gmail.com";

@@ -74,6 +74,9 @@ PROFILES = {
     "sealbeach":  dict(ideal=200, spread=55, size=(2,6),   tide=(1.5,4.5), offshore=45,  beachy=True,  buoy="46253"),
     "saltcreek":  dict(ideal=200, spread=42, size=(2.5,9), tide=(2.0,4.5), offshore=45,  beachy=False, buoy="46224"),
     "countyline": dict(ideal=250, spread=70, size=(2,7),   tide=(2.0,4.5), offshore=20,  beachy=True,  buoy="46221"),
+    "leocarrillo":dict(ideal=245, spread=60, size=(2,8),   tide=(1.5,4.5), offshore=20,  beachy=False, buoy="46221"),
+    "staircase":  dict(ideal=245, spread=55, size=(2,8),   tide=(2.0,4.5), offshore=20,  beachy=False, buoy="46221"),
+    "lowerjetties":dict(ideal=205, spread=45, size=(2,7),  tide=(1.5,4.5), offshore=45,  beachy=True,  buoy="46253"),
     "zuma":       dict(ideal=212, spread=62, size=(2,7),   tide=(1.5,4.0), offshore=20,  beachy=True,  buoy="46221"),
     # South Bay sand — best on WNW; a straight S swell tends to close out
     "elporto":    dict(ideal=290, spread=55, size=(2.5,7), tide=(2.5,4.5), offshore=70,  beachy=True,  buoy="46221"),

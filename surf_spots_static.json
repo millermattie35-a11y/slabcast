@@ -143,6 +143,19 @@
   "board": "Longboard on the small mushy days; shortboard when a bigger combo swell sharpens it up."
  },
  {
+  "id": "leocarrillo",
+  "name": "Leo Carrillo",
+  "region": "Malibu",
+  "lat": 34.044,
+  "lon": -118.937,
+  "type": "Reef/point",
+  "note": "North Malibu reef and point right at the county line. Catches W/NW and S combo swells; can section over the rocks.",
+  "hazard": "Rocks, kelp, rip current",
+  "px": 322.0,
+  "py": 303.0,
+  "board": "Shortboard when the reef has push; longboard or groveler on the smaller, softer days."
+ },
+ {
   "id": "huntington",
   "name": "Huntington (Pier)",
   "region": "Orange County",
@@ -258,5 +271,31 @@
   "px": 829.0,
   "py": 663.0,
   "board": "Performance wall, shortboard; only longboard it on tiny days."
+ },
+ {
+  "id": "staircase",
+  "name": "Staircase Beach",
+  "region": "Malibu",
+  "lat": 34.046,
+  "lon": -118.951,
+  "type": "Reef/cobble",
+  "note": "Cobble reef just down-coast from County Line (stairs off PCH). Combo-swell wall, mellower crowd than County Line.",
+  "hazard": "Rocks, kelp",
+  "px": 317.0,
+  "py": 301.0,
+  "board": "Shortboard when it has push; longboard or groveler on the small days."
+ },
+ {
+  "id": "lowerjetties",
+  "name": "Newport Lower Jetties",
+  "region": "Orange County",
+  "lat": 33.63,
+  "lon": -117.96,
+  "type": "Beach/jetty",
+  "note": "Jettied beachbreak near the Santa Ana River mouth. Punchy peaks on a S/SW; the jetty sandbars hold shape.",
+  "hazard": "Rip current, crowd",
+  "px": 725.0,
+  "py": 561.0,
+  "board": "Shortboard most days; groveler when it's small and soft."
  }
 ]
