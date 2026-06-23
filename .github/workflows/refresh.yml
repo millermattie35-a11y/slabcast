@@ -2,9 +2,12 @@ name: Refresh SLABCAST
 
 on:
   schedule:
-    # 10:00 UTC = 3:00 AM Pacific Daylight (summer) / 2:00 AM Pacific Standard (winter)
-    - cron: "0 10 * * *"
-  workflow_dispatch:   # lets you trigger a rebuild by hand from the Actions tab
+    # GitHub's free scheduler is best-effort and lags at on-the-hour peak times,
+    # so we run a few off-peak early-AM slots for redundancy. Times are UTC.
+    - cron: "17 8 * * *"    # ~1:17 AM Pacific
+    - cron: "17 11 * * *"   # ~4:17 AM Pacific
+    - cron: "17 13 * * *"   # ~6:17 AM Pacific
+  workflow_dispatch:        # manual "Run workflow" button
 
 permissions:
   contents: read
