@@ -2,11 +2,14 @@ name: Refresh SLABCAST
 
 on:
   schedule:
-    # GitHub's free scheduler is best-effort and lags at on-the-hour peak times,
-    # so we run a few off-peak early-AM slots for redundancy. Times are UTC.
-    - cron: "17 8 * * *"    # ~1:17 AM Pacific
-    - cron: "17 11 * * *"   # ~4:17 AM Pacific
-    - cron: "17 13 * * *"   # ~6:17 AM Pacific
+    # GitHub's free scheduler frequently drops runs, so we fire several spread,
+    # off-peak attempts across the early morning. Even if most are skipped,
+    # one should land before dawn. Times are UTC (Pacific is UTC-7 in summer).
+    - cron: "23 8 * * *"    # ~1:23 AM Pacific
+    - cron: "37 10 * * *"   # ~3:37 AM Pacific
+    - cron: "23 12 * * *"   # ~5:23 AM Pacific
+    - cron: "37 14 * * *"   # ~7:37 AM Pacific
+    - cron: "23 16 * * *"   # ~9:23 AM Pacific
   workflow_dispatch:        # manual "Run workflow" button
 
 permissions:
