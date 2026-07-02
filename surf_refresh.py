@@ -44,7 +44,7 @@ def _today_local(): return _now_local().date()
 FORECAST_DAYS = 10
 CONFIDENT_DAYS = 4
 DAY_START, DAY_END = 5, 21   # surfable window 5am–9pm
-WAVE_MODELS = ["gwam", "best_match"]   # only models with SoCal coverage on Open-Meteo
+WAVE_MODELS = ["best_match"]   # gwam runs ~2x hot vs SoCal buoys; best_match tracks them
 CARD = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
 
 def card(d):
@@ -399,11 +399,94 @@ def face_mult(per, kind):
 # Report the AVERAGE rideable face, deliberately conservative — we'd rather a
 # surfer find it bigger than expected than smaller. Biases the shown size below
 # the biggest-set face. Display only; never touches the score.
-FACE_BIAS = 0.78
+FACE_BIAS = 0.86
 
 def face_ft(swell_ft, per, kind):
     if swell_ft is None: return None
     return round(swell_ft * face_mult(per, kind) * FACE_BIAS, 1)
+
+# ===========================================================================
+# RECEIVING MODEL (accuracy upgrade) — how much of the open-coast swell each
+# break ACTUALLY gets, and how big the face stands up. Physically grounded:
+# island shadowing + coastline window + directional spread + break focus,
+# from each spot's lat/lon. Feeds the shown size AND the score's received
+# energy — never the scoring FORMULA/weights.
+# ===========================================================================
+def _hav_km(a,b,c,d):
+    R=6371.0; p1,p2=math.radians(a),math.radians(c)
+    dp=math.radians(c-a); dl=math.radians(d-b)
+    x=math.sin(dp/2)**2+math.cos(p1)*math.cos(p2)*math.sin(dl/2)**2
+    return 2*R*math.asin(math.sqrt(x))
+def _bearing_to(a,b,c,d):
+    p1,p2=math.radians(a),math.radians(c); dl=math.radians(d-b)
+    y=math.sin(dl)*math.cos(p2); x=math.cos(p1)*math.sin(p2)-math.sin(p1)*math.cos(p2)*math.cos(dl)
+    return math.degrees(math.atan2(y,x))%360
+ISLANDS=[("Catalina",33.39,-118.42,15),("San Clemente Is",32.90,-118.49,9),
+  ("San Nicolas Is",33.24,-119.49,6),("Santa Barbara Is",33.475,-119.035,2.5),
+  ("Anacapa",34.01,-119.40,4),("Santa Cruz Is",34.01,-119.76,12),
+  ("Santa Rosa Is",33.95,-120.10,11),("San Miguel Is",34.04,-120.36,6)]
+_SHADOW_LEAK=0.40; _SHADOW_FEATHER=10.0
+def _shadow_raw(lat,lon,theta):
+    surv=1.0
+    for nm,ilat,ilon,r in ISLANDS:
+        d=_hav_km(lat,lon,ilat,ilon)
+        if d<r+1: continue
+        b=_bearing_to(lat,lon,ilat,ilon); hw=math.degrees(math.atan2(r,d)); off=_angdiff(theta,b)
+        if off<=hw: surv*=_SHADOW_LEAK
+        elif off<=hw+_SHADOW_FEATHER: surv*=_SHADOW_LEAK+(1-_SHADOW_LEAK)*(off-hw)/_SHADOW_FEATHER
+    return surv
+def _shore_raw(normal,theta,hw=105.0):
+    off=_angdiff(theta,normal)
+    return 0.0 if off>=hw else 0.5*(1+math.cos(math.pi*off/hw))
+_SPREAD=24.0; _NS=9
+_SOFF=[(-_SPREAD+2*_SPREAD*i/(_NS-1)) for i in range(_NS)]
+_SWT=[math.cos(math.pi*o/(2*_SPREAD))**2 for o in _SOFF]; _SWSUM=sum(_SWT)
+def recv_frac(lat,lon,normal,theta):
+    """Fraction of open-coast swell FROM dir theta that reaches this break."""
+    if theta is None: theta=normal
+    s=0.0
+    for o,w in zip(_SOFF,_SWT):
+        th=(theta+o)%360
+        s+=w*_shore_raw(normal,th)*_shadow_raw(lat,lon,th)
+    return s/_SWSUM
+# local shelter (bights, breakwaters) not captured by island geometry
+SHELTER={"newport":0.92,"lowerjetties":0.90,"huntington":0.95,"wedge":0.95,
+         "redondobw":0.82,"sealbeach":0.85,"sapphire":0.92,"hermosa":0.96}
+# Physical shore-normal (max-exposure bearing) used by the RECEIVING model. Distinct
+# from a spot's scoring 'ideal' (its BEST swell direction). e.g. South Bay beaches
+# score best on WNW groundswell (ideal~290) but physically face ~WSW (~255), so they
+# still pick up W/WSW windswell for size. Falls back to 'ideal' when unset.
+SHORE_NORMAL={"elporto":258,"hermosa":255,"sapphire":258,"redondobw":248,"zuma":222}
+def focus_for(ptype):
+    """Break-face gain: points/reefs stand swell up; open beaches ~1; Wedge jacks."""
+    k=(ptype or "").lower()
+    if "shore" in k: return 1.55
+    if "reef" in k or "point" in k: return 1.20
+    if "jetty" in k: return 1.03
+    return 1.00
+def receive(spot,a,w,trains):
+    """Return (received Hs in METERS, dominant period s, dominant dir deg)."""
+    lat,lon=spot["lat"],spot["lon"]; nrm=SHORE_NORMAL.get(spot["id"], a["ideal"]); sh=SHELTER.get(spot["id"],1.0)
+    if trains:
+        E=0.0; best=None
+        for tr in trains:
+            h=tr.get("h")
+            if h is None: continue
+            d=tr.get("d")
+            att=recv_frac(lat,lon,nrm,d)*sh
+            hr=h*att
+            E+=hr*hr
+            if best is None or hr>best[0]: best=(hr,tr.get("p"),d)
+        if E>0 and best:
+            return math.sqrt(E)/3.281, (best[1] or w.get("per")), (best[2] if best[2] is not None else w.get("dir"))
+    d=w.get("dir")
+    att=recv_frac(lat,lon,nrm,d)*sh
+    hh=w.get("hgt")
+    return ((hh*att) if hh is not None else None), w.get("per"), d
+def face_disp(recv_ft, per, ptype):
+    """Breaking face from received Hs: period shoaling * break focus, conservative."""
+    if recv_ft is None: return None
+    return round(recv_ft * face_mult(per, "") * focus_for(ptype) * FACE_BIAS, 1)
 
 def mk_window(start,end,mid):
     return {"start":int(start),"end":int(end),
@@ -454,7 +537,7 @@ def fetch_model_now(lat, lon):
     url = ("https://marine-api.open-meteo.com/v1/marine?" + urllib.parse.urlencode({
         "latitude":lat,"longitude":lon,
         "hourly":"swell_wave_height,swell_wave_period,wave_height,wave_period",
-        "timezone":TZ,"forecast_days":1,"models":"gwam","cell_selection":"sea"}))
+        "timezone":TZ,"forecast_days":1,"models":"best_match","cell_selection":"sea"}))
     try:
         h = _get(url).get("hourly", {}); times = h.get("time", [])
         if not times: return None
@@ -481,9 +564,11 @@ def compute_bias(buoys):
         # swell-partition differences make large single-buoy ratios untrustworthy,
         # so big disagreement instead shows up as LOWER confidence (agree), not a
         # distorted height.
-        hRatio = max(0.78, min(1.28, raw))
+        hRatio = max(0.72, min(1.30, raw))
         pOff = max(-3.0, min(3.0, sp - (mp or sp)))
-        agree = max(0.50, 1 - abs(1 - raw) * 0.6)
+        # A systematic model-vs-buoy offset is a height nudge, not a forecast-
+        # confidence killer, so the agree penalty is gentle and well-floored.
+        agree = max(0.78, 1 - abs(1 - raw) * 0.35)
         return bid, {"hRatio":round(hRatio,3),"pOff":round(pOff,2),"agree":round(agree,2),
                      "buoyH":round(sh,2),"modelH":round(mh,2)}
     with ThreadPoolExecutor(max_workers=max(2,len(buoys))) as ex:
@@ -491,7 +576,7 @@ def compute_bias(buoys):
             bid, v = f.result(); out[bid] = v
     return out
 
-CORRECT_GAIN = 0.45   # apply only ~half the buoy nudge — a reality-check, not an override
+CORRECT_GAIN = 0.55   # near-term height tracks the measured buoys a touch more
 
 def correct(w, bias, lead):
     """Gently nudge a model hour toward the measured buoy bias, fading by lead day."""
@@ -554,17 +639,23 @@ def build():
             for hr,t,w in rows:
                 if not (DAY_START<=hr<=DAY_END): continue
                 wc = correct(w, bias, lead)
+                tr = trains.get(t)
+                rH, rP, rD = receive(spot, a, wc, tr)   # received size (m), dom period, dom dir
+                wr = {"hgt":rH, "per":(rP if rP is not None else wc.get("per")),
+                      "dir":(rD if rD is not None else wc.get("dir"))}
                 th = tide_height(ev, dt.datetime.strptime(t,"%Y-%m-%dT%H:%M"))
-                sc = score_hour(wc, wind.get(t), th, tlo, thi, a)
-                if sc: sc["trains"]=trains.get(t); scored.append((hr,sc))
+                sc = score_hour(wr, wind.get(t), th, tlo, thi, a)
+                if sc:
+                    sc["trains"]=tr
+                    sc["faceR"]=face_disp(sc["ft"], sc["per"], spot["type"])
+                    scored.append((hr,sc))
             if not scored:
                 days.append({"date":d,"lead":lead,"confident":confident,"nodata":True,"score":0,"window":None,"hours":[],"peakE":0,"confPct":confPct}); continue
             bb = best_block(scored); start,end,mid,avg = bb
             win = mk_window(start,end,mid)
-            _expw = exposure(mid["dir"], a["ideal"], a["spread"])
-            win["faceFt"] = face_ft(round(win["swellH"]*_expw,1), mid["per"], spot["type"])
+            win["faceFt"] = mid.get("faceR")
             hours=[{"h":hr,"score":sc["score"],"ft":round(sc["ft"],1),
-                    "face":face_ft(round(sc["ft"]*exposure(sc["dir"], a["ideal"], a["spread"]),1), sc["per"], spot["type"]),
+                    "face":sc.get("faceR"),
                     "wind":(round(sc["windKt"]) if sc["windKt"] is not None else None),
                     "windDir":sc["windDir"],"wt":sc["windType"],"tide":sc["tideFt"],"e":sc["e"]}
                    for hr,sc in scored]
